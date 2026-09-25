@@ -57,6 +57,6 @@ jobs:
       - name: Run Django system checks
         run: python manage.py check
       - name: Verify production static build
-        run: DEBUG=False ALLOWED_HOSTS=example.com CSRF_TRUSTED_ORIGINS=https://example.com SECURE_HSTS_SECONDS=3600 python manage.py collectstatic --noinput
+        run: DEBUG=False MEDIA_UPLOADS_ENABLED=False ALLOWED_HOSTS=example.com CSRF_TRUSTED_ORIGINS=https://example.com SECURE_HSTS_SECONDS=3600 python manage.py collectstatic --noinput
       - name: Run test suite
         run: python manage.py test --verbosity 2
