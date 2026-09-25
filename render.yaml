@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: elearning-platform-demo
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: ./build.sh
+    startCommand: ./start.sh
+    healthCheckPath: /healthz/
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_CONN_MAX_AGE
+        value: "60"
+      - key: DB_DISABLE_SERVER_SIDE_CURSORS
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "3600"
+      - key: SEED_DEMO_DATA
+        value: "True"
+      - key: CELERY_ENABLED
+        value: "False"
+      - key: MEDIA_UPLOADS_ENABLED
+        value: "False"
+      - key: ALLOW_INSTRUCTOR_REGISTRATION
+        value: "False"

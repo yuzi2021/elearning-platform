@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Add course resource · eLearning Platform{% endblock %}
+{% block content %}
+<div class="page-wrap form-shell">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.pk %}">{{ course.title }}</a></li><li class="breadcrumb-item active" aria-current="page">Add resource</li></ol></nav>
+    <header class="page-header"><div><p class="eyebrow">Learning resources</p><h1 class="page-title">Add a resource</h1><p class="page-lead">Use a descriptive title so learners know why and when to open the file.</p></div></header>
+    <section class="panel">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endfor %}
+            <div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Add course resource</button><a class="btn btn-outline-secondary" href="{% url 'courses:course_detail' course.pk %}">Cancel</a></div>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Course catalog · eLearning Platform{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">Course catalog</p>
+            <h1 class="page-title">Choose what to learn next</h1>
+            <p class="page-lead">Compare course focus, instructor, enrollment, and learner feedback before opening the course.</p>
+        </div>
+        {% if can_create_course %}<a class="btn btn-primary" href="{% url 'courses:course_create' %}">Create course</a>{% endif %}
+    </header>
+
+    {% if user_type == 'anonymous' %}
+    <div class="alert alert-info" role="note">You can explore every course now. <a href="{% url 'courses:login' %}">Log in</a> as a learner to enroll.</div>
+    {% endif %}
+
+    {% if courses %}
+    <div class="card-grid" aria-label="Available courses">
+        {% for course in courses %}
+        <article class="learning-card">
+            <div class="learning-card-body">
+                <span class="status-badge">Open course</span>
+                <h2 class="mt-3">{{ course.title }}</h2>
+                <p>{{ course.description|truncatewords:28 }}</p>
+                <div class="meta-row">
+                    <span><i class="bi bi-person" aria-hidden="true"></i> {{ course.instructor_name }}</span>
+                    <span><i class="bi bi-people" aria-hidden="true"></i> {{ course.enrollment_count }} enrolled</span>
+                    {% if course.avg_rating %}<span><i class="bi bi-star-fill" aria-hidden="true"></i> {{ course.avg_rating|floatformat:1 }}/5</span>{% endif %}
+                </div>
+                <div class="card-action"><a class="btn btn-outline-primary w-100" href="{% url 'courses:course_detail' course.pk %}">View course details</a></div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-journal-x" aria-hidden="true"></i>
+        <h2>No courses have been published</h2>
+        {% if can_create_course %}
+        <p>Create the first course and give learners a clear description of what they can expect.</p>
+        <a class="btn btn-primary" href="{% url 'courses:course_create' %}">Create the first course</a>
+        {% else %}
+        <p>There is nothing to browse yet. Please check back after an instructor publishes a course.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Manage learners · {{ course.title }}{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.pk %}">{{ course.title }}</a></li><li class="breadcrumb-item active" aria-current="page">Learners</li></ol></nav>
+    <header class="page-header"><div><p class="eyebrow">Instructor workspace</p><h1 class="page-title">Manage learners</h1><p class="page-lead">{{ active_count }} active and {{ blocked_count }} inactive enrollment{{ blocked_count|pluralize }} in {{ course.title }}.</p></div></header>
+    {% if enrollments %}
+    <div class="table-responsive panel table-panel">
+        <table class="table align-middle">
+            <caption class="visually-hidden">Enrollment records for {{ course.title }}</caption>
+            <thead><tr><th scope="col">Learner</th><th scope="col">Joined</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr></thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                <tr>
+                    <td><strong>{{ enrollment.student_name }}</strong><div class="text-muted small">{{ enrollment.student.email }}</div></td>
+                    <td>{{ enrollment.enrolled_at|date:"j M Y" }}</td>
+                    <td>{% if enrollment.is_active %}<span class="status-badge">Active</span>{% else %}<span class="badge text-bg-secondary">Inactive</span>{% endif %}</td>
+                    <td><div class="d-flex justify-content-end flex-wrap gap-2">
+                        <form method="post" action="{% url 'courses:toggle_enrollment' enrollment.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-primary" type="submit">{% if enrollment.is_active %}Suspend access{% else %}Restore access{% endif %}</button></form>
+                        <form method="post" action="{% url 'courses:remove_enrollment' enrollment.pk %}" onsubmit="return confirm('Permanently remove this enrollment?');">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form>
+                    </div></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-people" aria-hidden="true"></i><h2>No learners enrolled yet</h2><p>New enrollments will appear here automatically.</p><a class="btn btn-outline-primary" href="{% url 'courses:course_detail' course.pk %}">Back to course</a></div>
+    {% endif %}
+</div>
+{% endblock %}

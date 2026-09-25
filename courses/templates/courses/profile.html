@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{% if form %}Edit profile{% else %}Profile{% endif %} · eLearning Platform{% endblock %}
+{% block content %}
+<div class="page-wrap {% if form %}form-shell{% endif %}">
+    {% if form %}
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'courses:profile' %}">Profile</a></li><li class="breadcrumb-item active" aria-current="page">Edit</li></ol></nav>
+    <header class="page-header"><div><p class="eyebrow">Account</p><h1 class="page-title">Edit your profile</h1><p class="page-lead">Keep the information that helps people understand your learning or teaching context.</p></div></header>
+    <section class="panel">
+        <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+            {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endfor %}
+            <div class="d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">Save profile</button><a class="btn btn-outline-secondary" href="{% url 'courses:profile' %}">Cancel</a></div>
+        </form>
+    </section>
+    {% else %}
+    <header class="page-header">
+        <div><p class="eyebrow">{% if user_type == 'teacher' %}Instructor profile{% else %}Learner profile{% endif %}</p><h1 class="page-title">{{ user.get_full_name|default:user.username }}</h1><p class="page-lead">@{{ user.username }}</p></div>
+        <a class="btn btn-outline-primary" href="{% url 'courses:edit_profile' %}">Edit profile</a>
+    </header>
+    <div class="content-grid">
+        <section>
+            <div class="panel">
+                <div class="d-flex align-items-start gap-3">
+                    {% if profile.profile_picture %}<img class="rounded-circle" width="88" height="88" style="object-fit:cover" src="{{ profile.profile_picture.url }}" alt="Profile picture for {{ user.get_full_name|default:user.username }}">{% else %}<span class="account-avatar" style="width:88px;height:88px;font-size:2rem" aria-hidden="true">{{ user.first_name|default:user.username|first|upper }}</span>{% endif %}
+                    <div><h2 class="section-title">About</h2><p class="text-muted mt-2 mb-0">{{ profile.bio|default:"No profile introduction has been added yet." }}</p></div>
+                </div>
+                {% if user_type == 'teacher' %}
+                <dl class="row mt-4 mb-0"><dt class="col-sm-4">Expertise</dt><dd class="col-sm-8">{{ profile.subject_expertise|default:"Not specified" }}</dd><dt class="col-sm-4">Experience</dt><dd class="col-sm-8">{{ profile.years_of_experience }} year{{ profile.years_of_experience|pluralize }}</dd><dt class="col-sm-4">Office hours</dt><dd class="col-sm-8">{{ profile.office_hours|default:"Not specified" }}</dd></dl>
+                {% else %}
+                <dl class="row mt-4 mb-0"><dt class="col-sm-4">Organization</dt><dd class="col-sm-8">{{ profile.organization|default:"Not specified" }}</dd><dt class="col-sm-4">Active courses</dt><dd class="col-sm-8">{{ courses_count }}</dd></dl>
+                {% endif %}
+            </div>
+        </section>
+        <aside>
+            <div class="panel">
+                <h2 class="section-title">{% if user_type == 'teacher' %}Courses you manage{% else %}Your courses{% endif %}</h2>
+                {% if user_type == 'teacher' and created_courses %}<ul class="activity-list mt-2">{% for course in created_courses %}<li><a href="{% url 'courses:course_detail' course.pk %}">{{ course.title }}</a></li>{% endfor %}</ul>
+                {% elif user_type == 'student' and enrolled_courses %}<ul class="activity-list mt-2">{% for course in enrolled_courses %}<li><a href="{% url 'courses:course_detail' course.pk %}">{{ course.title }}</a></li>{% endfor %}</ul>
+                {% else %}<p class="text-muted mt-3">{% if user_type == 'teacher' %}You have not created a course yet.{% else %}You are not enrolled in a course yet.{% endif %}</p>{% endif %}
+            </div>
+        </aside>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

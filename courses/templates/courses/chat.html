@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Course discussion · {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+    <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}">Course catalog</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.pk %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Discussion</li>
+        </ol>
+    </nav>
+
+    <header class="page-header">
+        <div>
+            <p class="eyebrow">Live course space</p>
+            <h1 class="page-title">Course discussion</h1>
+            <p class="page-lead">Ask focused questions and share useful course context with enrolled learners and the instructor.</p>
+        </div>
+        <span id="connection-status" class="status-badge" role="status" aria-live="polite">Connecting…</span>
+    </header>
+
+    {% if not distributed_realtime_enabled %}
+    <div class="alert alert-secondary" role="note">This demo is using a single-process real-time channel. Messages work on this instance, but are not distributed across multiple servers.</div>
+    {% endif %}
+
+    <section class="panel" aria-labelledby="discussion-title">
+        <h2 class="visually-hidden" id="discussion-title">Messages</h2>
+        <div id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions">
+            {% for message in messages %}
+            <article class="chat-message">
+                <div class="chat-message-meta"><strong>{{ message.sender_name }}</strong><time datetime="{{ message.created_at|date:'c' }}">{{ message.created_at|date:"j M, H:i" }}</time></div>
+                <p>{{ message.message }}</p>
+            </article>
+            {% empty %}
+            <div class="empty-state" id="empty-chat"><h2>No messages yet</h2><p>Start with a course question or a useful observation.</p></div>
+            {% endfor %}
+        </div>
+        <form id="chat-form" class="chat-compose mt-3">
+            <label class="visually-hidden" for="chat-message">Message</label>
+            <textarea id="chat-message" rows="2" maxlength="1000" placeholder="Write a course-related message" required disabled></textarea>
+            <button class="btn btn-primary" type="submit" disabled>Send message</button>
+        </form>
+        <div id="chat-error" class="field-error mt-2" role="alert" aria-live="assertive"></div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-log { height: min(58vh, 520px); overflow-y: auto; padding: .25rem .75rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-soft); }
+    .chat-message { max-width: 76ch; margin: .75rem 0; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: .7rem; background: white; }
+    .chat-message p { margin: .3rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .chat-message-meta { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); font-size: .8rem; }
+    .chat-compose { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: end; }
+    .chat-compose textarea { width: 100%; resize: vertical; padding: .7rem .8rem; border: 1px solid #b8c1ce; border-radius: .5rem; }
+    @media (max-width: 575.98px) { .chat-compose { grid-template-columns: 1fr; } .chat-compose .btn { width: 100%; } }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const log = document.getElementById('chat-log');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-message');
+    const sendButton = form.querySelector('button');
+    const status = document.getElementById('connection-status');
+    const error = document.getElementById('chat-error');
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/{{ course.pk }}/`);
+
+    function appendMessage(sender, message) {
+        document.getElementById('empty-chat')?.remove();
+        const article = document.createElement('article');
+        article.className = 'chat-message';
+        const meta = document.createElement('div');
+        meta.className = 'chat-message-meta';
+        const name = document.createElement('strong');
+        name.textContent = sender;
+        const time = document.createElement('time');
+        time.textContent = 'Just now';
+        const body = document.createElement('p');
+        body.textContent = message;
+        meta.append(name, time);
+        article.append(meta, body);
+        log.append(article);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    socket.addEventListener('open', () => {
+        status.textContent = 'Live';
+        input.disabled = false;
+        sendButton.disabled = false;
+        input.focus();
+        log.scrollTop = log.scrollHeight;
+    });
+    socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'error') {
+            error.textContent = data.message;
+            return;
+        }
+        appendMessage(data.sender, data.message);
+    });
+    socket.addEventListener('close', () => {
+        status.textContent = 'Disconnected';
+        input.disabled = true;
+        sendButton.disabled = true;
+        error.textContent = 'The live connection ended. Refresh the page to reconnect.';
+    });
+    socket.addEventListener('error', () => {
+        error.textContent = 'The live discussion is temporarily unavailable.';
+    });
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const message = input.value.trim();
+        if (!message || socket.readyState !== WebSocket.OPEN) return;
+        socket.send(JSON.stringify({message}));
+        input.value = '';
+        error.textContent = '';
+    });
+</script>
+{% endblock %}

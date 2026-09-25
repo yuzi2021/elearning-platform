@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Notifications · eLearning Platform{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <header class="page-header">
+        <div><p class="eyebrow">Course activity</p><h1 class="page-title">Notifications</h1><p class="page-lead">Enrollment and resource updates that are relevant to your account.</p></div>
+        {% if unread_count %}<form method="post" action="{% url 'courses:mark_all_notifications_read' %}">{% csrf_token %}<button class="btn btn-outline-primary" type="submit">Mark all as read</button></form>{% endif %}
+    </header>
+    {% if notifications %}
+    <section class="panel" aria-label="Notifications list">
+        <ul class="activity-list">
+            {% for notification in notifications %}
+            <li class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    {% if not notification.is_read %}<span class="status-badge mb-2">Unread</span>{% endif %}
+                    <div>{{ notification.message }}</div>
+                    <div class="text-muted small mt-1">{{ notification.created_at|timesince }} ago</div>
+                </div>
+                {% if notification.course %}
+                <form method="post" action="{% url 'courses:mark_notification_read' notification.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-primary" type="submit">Open course</button></form>
+                {% elif not notification.is_read %}
+                <form method="post" action="{% url 'courses:mark_notification_read' notification.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-primary" type="submit">Mark read</button></form>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-bell" aria-hidden="true"></i><h2>No notifications yet</h2><p>Course enrollment and resource activity will appear here when it happens.</p></div>
+    {% endif %}
+</div>
+{% endblock %}

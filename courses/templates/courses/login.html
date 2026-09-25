@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Log in · eLearning Platform{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <div class="content-grid">
+        <section class="form-shell">
+            <header class="page-header"><div><p class="eyebrow">Welcome back</p><h1 class="page-title">Log in to your learning space</h1><p class="page-lead">Use your email address and password.</p></div></header>
+            <div class="panel">
+                <form method="post" novalidate>{% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+                    {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endfor %}
+                    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+                    <button class="btn btn-primary w-100" type="submit">Log in</button>
+                </form>
+                <p class="text-muted small mt-3 mb-0">Need an account? <a href="{% url 'courses:register' %}">Register as a learner or instructor</a>.</p>
+            </div>
+        </section>
+        <aside>
+            <div class="panel">
+                <p class="eyebrow">Portfolio demo</p><h2 class="section-title">Try both workflows</h2>
+                <dl class="mt-3 mb-0"><dt>Learner</dt><dd><code>student1@test.com</code><br><code>testpass123</code></dd><dt class="mt-3">Instructor</dt><dd><code>teacher1@test.com</code><br><code>testpass123</code></dd></dl>
+                <p class="text-muted small mt-3 mb-0">These are fictional, non-privileged demonstration accounts. Do not reuse these passwords elsewhere.</p>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

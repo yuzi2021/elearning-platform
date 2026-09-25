@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Django and generated application data
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media/
+/MEDIA/
+/staticfiles/
+
+# Tests and coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# Environment variables and virtual environments
+.env
+.env.local
+.env.*.local
+.venv/
+venv/
+env/
+ENV/
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

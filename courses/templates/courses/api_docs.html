@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}REST API guide · eLearning Platform{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <header class="page-header"><div><p class="eyebrow">Developer interface</p><h1 class="page-title">REST API guide</h1><p class="page-lead">Representative endpoints behind course discovery, learner actions, profiles, and external-service demonstrations.</p></div><a class="btn btn-outline-primary" href="/api/">Open browsable API</a></header>
+    <div class="table-responsive panel table-panel">
+        <table class="table"><caption class="visually-hidden">Representative REST endpoints</caption><thead><tr><th scope="col">Method</th><th scope="col">Endpoint</th><th scope="col">Purpose</th><th scope="col">Access</th></tr></thead><tbody>
+            <tr><td><code>GET</code></td><td><a href="/api/courses/"><code>/api/courses/</code></a></td><td>Searchable course catalog</td><td>Public</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/courses/{id}/</code></td><td>Course summary and aggregate values</td><td>Public</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/courses/{id}/enroll/</code></td><td>Create a learner enrollment</td><td>Learner</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/courses/{id}/feedback/</code></td><td>Publish feedback after enrollment</td><td>Enrolled learner</td></tr>
+            <tr><td><code>GET/PATCH</code></td><td><code>/api/students/{id}/</code></td><td>Read or update a scoped learner profile</td><td>Authenticated / owner write</td></tr>
+            <tr><td><code>GET/PATCH</code></td><td><code>/api/teachers/{id}/</code></td><td>Read or update an instructor profile</td><td>Authenticated / owner write</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/course/analyze/</code></td><td>TextRazor analysis with deterministic fallback</td><td>Instructor</td></tr>
+            <tr><td><code>GET</code></td><td><a href="/api/weather/"><code>/api/weather/</code></a></td><td>Open-Meteo response with database cache fallback</td><td>Public</td></tr>
+        </tbody></table>
+    </div>
+    <div class="panel mt-3"><h2 class="section-title">Response behavior</h2><p class="text-muted mt-2 mb-0">Write endpoints use session or basic authentication, validate role and object access, return JSON errors with appropriate HTTP status codes, and keep optional background work outside the request’s success path.</p></div>
+</div>
+{% endblock %}
