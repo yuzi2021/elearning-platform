@@ -38,12 +38,23 @@
 - Added API documentation, deterministic demo operations, PostgreSQL/Redis CI,
   and 25 meaningful tests for hardened behavior, bringing discovery to 85.
 
-## Verification limitations
+## Final verification
 
-- Docker was not installed on the audit host, so Compose was not executed.
-- No Neon/Render credentials or external deployment resources were available;
-  there is no verified live URL.
-- PostgreSQL execution is configured in CI but requires the workflow to run on
-  GitHub before a passing CI claim is made.
+- The complete Docker Compose stack ran with Django/Daphne, PostgreSQL 16,
+  Redis 7, and Celery; all 85 tests passed against PostgreSQL.
+- `python manage.py check` and the migration-drift check passed, and production
+  static collection completed successfully.
+- A free public deployment is live at
+  <https://elearning-platform-demo.onrender.com>, backed by a separate persistent
+  Neon PostgreSQL database.
+- Live verification covered anonymous/learner/instructor permissions, feedback,
+  API documentation, static assets, readiness, and bidirectional WebSockets.
+  A uniquely identified feedback row survived a Render service restart.
+
+## Remaining verification limits
+
 - No formal accessibility audit, browser-device lab, coverage percentage, or
   production usage claim is made.
+- The public free service does not run Redis/Celery, accept uploads, or provide
+  multi-instance WebSocket delivery. Those components are verified in the
+  complete local architecture and are not claimed as publicly hosted.

@@ -197,8 +197,7 @@ python manage.py test
 `.github/workflows/ci.yml` runs on pushes and pull requests with PostgreSQL 16
 and Redis 7 services. It checks migration drift, applies migrations to
 PostgreSQL, runs Django checks, builds production static assets, and executes
-the complete suite. CI is configured but cannot be claimed as passing until the
-repository is pushed to GitHub and the workflow runs there.
+the complete suite. The workflow is active in the public GitHub repository.
 
 ## Run locally with Docker
 
@@ -219,10 +218,9 @@ docker compose run --rm web python manage.py seed_demo
 docker compose down
 ```
 
-`docker compose down` preserves named volumes. This host did not provide Docker,
-so the Compose stack could not be executed during the final local verification;
-fresh migrations and seeding were verified against an isolated SQLite database,
-and CI is responsible for the PostgreSQL-backed verification.
+`docker compose down` preserves named volumes. The complete Compose stack was
+verified locally with Daphne/Django, PostgreSQL 16, Redis 7, and a Celery worker;
+the PostgreSQL-backed suite passed all 85 tests.
 
 ## Lightweight local setup
 
@@ -254,7 +252,9 @@ all demo passwords for a private/non-public environment.
 
 ## Public demo deployment
 
-Recommended public architecture:
+Live demo: **<https://elearning-platform-demo.onrender.com>**
+
+Verified public architecture:
 
 - Render Python web service using `render.yaml`;
 - persistent Neon PostgreSQL through a pooled `DATABASE_URL` with
@@ -263,7 +263,14 @@ Recommended public architecture:
 - media uploads disabled unless S3-compatible object storage is configured;
 - Celery/Redis omitted unless separate services have actually been provisioned.
 
-Deployment steps:
+The deployed service uses Render's Free web plan in Frankfurt and an independent
+Neon Free PostgreSQL project in Frankfurt. The database is not tied to Render's
+ephemeral filesystem or deployment lifecycle. The deployment was verified with
+authentication, role/ownership boundaries, feedback writes, API documentation,
+static assets, health/readiness checks, and bidirectional WebSockets. A feedback
+record remained present after an explicit web-service restart.
+
+To reproduce the deployment in another account:
 
 1. Create a Neon project and copy its pooled connection URL.
 2. Create a Render Blueprint from this repository.
@@ -273,10 +280,12 @@ Deployment steps:
 5. Verify `/livez/`, `/readyz/`, authentication, a learner action, and data
    persistence across a redeploy.
 
-Free web services may sleep, so the first request can have a cold start. No
-artificial keep-alive traffic is used. There is currently **no verified live
-URL** in this repository; do not describe the public deployment as active until
-the external Render and Neon resources have been created and checked.
+Free web services sleep after inactivity, so the first request can have a cold
+start. Neon Free also scales inactive compute to zero. No artificial keep-alive
+traffic is used. The public service intentionally has no Redis/Celery worker or
+persistent file storage: database-backed workflows remain available, while
+email dispatch is disabled, uploads are labelled unavailable, and WebSockets
+are limited to the service's single process.
 
 ## 3–5 minute interview walkthrough
 
@@ -316,8 +325,12 @@ the external Render and Neon resources have been created and checked.
 
 - The model has courses and resources, not modules, lessons, assignments, or
   completion tracking.
-- Public deployment still requires owner-created Render and Neon resources.
-- Compose could not be executed on the audit host because Docker was absent.
+- The free public service can cold-start after inactivity, and Neon Free compute
+  can also resume from scale-to-zero.
+- Public email/background processing is disabled because no Redis/Celery worker
+  is provisioned; the complete local architecture demonstrates that path.
+- Public uploads are disabled because Render's filesystem is ephemeral and no
+  object store is provisioned.
 - The frontend received accessibility-conscious improvements, not a formal WCAG
   audit or user study.
 - Email tasks are best-effort and deliberately do not auto-retry; a delivery

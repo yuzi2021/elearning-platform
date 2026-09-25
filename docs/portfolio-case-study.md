@@ -35,6 +35,9 @@ WhiteNoise · Automated Django Testing
 - Grew the verified suite from 60 baseline tests to 85 meaningful tests,
   including end-to-end ASGI WebSocket coverage and optional-dependency failure
   paths.
+- Deployed the portfolio demo on a free Render web service backed by persistent
+  Neon PostgreSQL, then verified health, authentication, access boundaries,
+  feedback persistence across a service restart, and live WebSocket exchange.
 - Added PostgreSQL/Redis CI services, migration-drift checks, deployment checks,
   production static collection, deterministic demo seeding, and separate
   liveness/readiness endpoints.
@@ -82,5 +85,7 @@ health signal really means, and which UX claims the underlying data can support.
 This is a demonstration-ready learning platform, not an enterprise LMS or a
 production-proven service. It does not yet model modules, lessons, assignments,
 or completion progress; no formal accessibility audit or user study has been
-performed; and the external Render/Neon deployment must be provisioned and
-verified by the repository owner before a live URL can be claimed.
+performed. The free public deployment can cold-start, disables uploads and
+Celery/email work because it has no persistent object storage or Redis worker,
+and uses single-process WebSockets. The complete Docker architecture retains
+PostgreSQL, Redis, Celery, and distributed Channels support.

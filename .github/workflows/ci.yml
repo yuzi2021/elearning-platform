@@ -38,7 +38,9 @@ jobs:
       REDIS_URL: redis://127.0.0.1:6379/0
       CACHE_URL: redis://127.0.0.1:6379/1
       CELERY_ENABLED: "False"
-      MEDIA_UPLOADS_ENABLED: "False"
+      # Exercise the normal upload workflow; resilience tests explicitly
+      # override this to False to cover the storage-free public-demo mode.
+      MEDIA_UPLOADS_ENABLED: "True"
 
     steps:
       - uses: actions/checkout@v4
